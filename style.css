@@ -1,0 +1,63 @@
+body {
+    background-image: linear-gradient(to left, black, rgb(55, 55, 55));
+}
+
+form {
+    background-color: rgba(141, 141, 141, 0.598);
+    width: min(30vw, 300px);
+    padding: 20px;
+    margin: auto;
+}
+
+/* .complete-btn,
+.delete-btn {
+    border: none;
+    height: 30px;
+    width: 30px;
+}
+
+.complete-btn {
+    background-color: rgb(58, 255, 58);
+}
+
+.delete-btn {
+    background-color: orange;
+} */
+
+.completed {
+    text-decoration: line-through;
+    opacity: 0.5;
+}
+
+.card-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card-body button {
+    font-weight: 700;
+}
+
+.complete-btn {
+    margin-right: 10px;
+}
+
+.card-body h5 {
+    flex: 1;
+    margin: 0;
+}
+
+.expand-collapse {
+    margin-left: 95%;
+    cursor: pointer;
+    width: 30px;
+}
+
+.expand-collapse:hover {
+    transform: scale(150%);
+}
+
+label {
+    margin-right: 10px;
+}
