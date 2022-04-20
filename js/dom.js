@@ -1,7 +1,7 @@
 import { toDoItem, toDoItems } from "./todo.js";
 
-export const DOMController = {
-    addTask(e) {
+export class UI {
+    static addTask(e) {
         e.preventDefault();
         const title = document.querySelector("#title").value;
         if (!title) {
@@ -10,8 +10,8 @@ export const DOMController = {
         const details = document.querySelector("#details")
             ? document.querySelector("#details").value
             : null;
-        const dueDate = document.querySelector("#duedate")
-            ? document.querySelector("#duedate").value
+        const dueDate = document.querySelector("#dueDate")
+            ? document.querySelector("#dueDate").value
             : null;
         const priority = document.querySelector("#priority")
             ? document.querySelector("#priority").value
@@ -20,10 +20,10 @@ export const DOMController = {
         toDoItems.push(
             new toDoItem(title, details, dueDate, priority, project)
         );
-        DOMController.displayToDo();
+        UI.displayToDo();
         assignToDoIndex();
-    },
-    collapseForm() {
+    }
+    static collapseForm() {
         const form = document.querySelector("form");
         const formComponents = document.querySelectorAll("form *");
         formComponents.forEach(item => {
@@ -35,31 +35,39 @@ export const DOMController = {
         expand.setAttribute("src", "../img/icons/menu-down.svg");
         expand.id = "expand-form";
         expand.className = "expand-collapse";
-        expand.addEventListener("click", DOMController.expandForm);
+        expand.addEventListener("click", UI.expandForm);
         form.append(expand);
-    },
-    completeTask(e) {
+    }
+    static collapseTask(e) {
+        const grandparent = e.target.parentElement.parentElement;
+        e.target.parentElement.remove();
+        const expand = document.createElement("img");
+        expand.setAttribute("src", "../img/icons/menu-down.svg");
+        expand.classList.add("expand-collapse", "expand-task");
+        grandparent.append(expand);
+    }
+    static completeTask(e) {
         e.target.parentElement.parentElement.classList.toggle("completed");
         toDoItems[
             parseInt(e.target.parentElement.parentElement.dataset.toDoIndex, 10)
         ].complete();
-    },
-    changeTitle() {
+    }
+    static changeTitle() {
         // TODO
-    },
-    changeDescription() {
+    }
+    static changeDescription() {
         // TODO
-    },
-    changeDueDate() {
+    }
+    static changeDueDate() {
         // TODO
-    },
-    changePriority() {
+    }
+    static changePriority() {
         // TODO
-    },
-    changeProject() {
+    }
+    static changeProject() {
         // TODO
-    },
-    deleteTask(index) {
+    }
+    static deleteTask(index) {
         toDoItems.splice(index, 1);
         const tasks = document.querySelectorAll(".task");
         for (let task of tasks) {
@@ -68,8 +76,8 @@ export const DOMController = {
             }
         }
         assignToDoIndex();
-    },
-    displayToDo() {
+    }
+    static displayToDo() {
         const taskList = document.querySelector("#tasklist");
         while (taskList.lastChild) {
             taskList.removeChild(taskList.lastChild);
@@ -77,10 +85,28 @@ export const DOMController = {
         for (let item of toDoItems) {
             const task = document.createElement("div");
             task.classList.add("task", "card", "container", "mb-3");
+            // Extra class for tasks with priorities
+            console.log(item.priority);
+            if (item.priority) {
+                switch (item.priority) {
+                    case "low":
+                        task.classList.add("border", "border-success");
+                        break;
+                    case "medium":
+                        task.classList.add("border", "border-warning");
+                        break;
+                    case "high":
+                        task.classList.add("border", "border-danger");
+                        break;
+                }
+            }
+            // Extra Class for tasks that are completed
+            if (item.isCompleted) {
+                task.classList.add("completed");
+            }
             task.style.width = "33vw";
             const taskBody = document.createElement("div");
-            taskBody.classList.add("card-body");
-            task.append(taskBody);
+            taskBody.classList.add("card-body", "card-body-flex");
             const taskText = document.createElement("h5");
             taskText.textContent = item.title;
             // Complete Button
@@ -94,16 +120,15 @@ export const DOMController = {
             // Expand Button
             const expand = document.createElement("img");
             expand.setAttribute("src", "../img/icons/menu-down.svg");
-            expand.className = "expand-collapse";
-            expand.addEventListener("click", e => DOMController.expandTask(e));
+            expand.classList.add("expand-collapse", "expand-task");
             // Add elements to page
             taskBody.append(taskText, completeBtn, deleteBtn);
+            task.append(taskBody);
             task.append(expand);
             taskList.append(task);
-            console.log(toDoItems);
         }
-    },
-    expandForm() {
+    }
+    static expandForm() {
         // Delete Expand Button
         document.querySelector("#expand-form").remove();
         // Details Input
@@ -146,22 +171,84 @@ export const DOMController = {
         collapse.setAttribute("src", "../img/icons/menu-up.svg");
         collapse.id = "collapse-form";
         collapse.className = "expand-collapse";
-        collapse.addEventListener("click", DOMController.collapseForm);
+        collapse.addEventListener("click", UI.collapseForm);
         // Add to Form
         const form = document.querySelector("form");
         form.append(details, dueDateWrapper, priority, project, collapse);
     }
-};
+    static expandTask(e) {
+        // TODO: All edit buttons
+        let task =
+            toDoItems[parseInt(e.target.parentElement.dataset.toDoIndex, 10)];
+        const card = e.target.parentElement;
+        const cardBody = document.createElement("div");
+        cardBody.classList.add("card-body");
+        e.target.remove();
+        // Details
+        const detailsWrapper = document.createElement("div");
+        detailsWrapper.classList.add("editable"); // TODO: Make Class
+        const detailsText = document.createElement("p");
+        detailsText.classList.add("card-text");
+        detailsText.textContent = task.details
+            ? task.details
+            : "No extra details.";
+        const detailsEdit = document.createElement("a");
+        detailsEdit.textContent = "Edit";
+        detailsEdit.href = "#";
+        detailsWrapper.append(detailsText, detailsEdit);
+        // Due Date
+        const dueDateWrapper = document.createElement("div");
+        dueDateWrapper.classList.add("editable");
+        const dueDateText = document.createElement("p");
+        dueDateText.classList.add("card-text");
+        dueDateText.textContent = task.dueDate
+            ? `Due: ${task.dueDate}`
+            : "No due date.";
+        const dueDateEdit = document.createElement("a");
+        dueDateEdit.textContent = "Edit";
+        dueDateEdit.href = "#";
+        dueDateWrapper.append(dueDateText, dueDateEdit);
+        // Priority
+        const priorityWrapper = document.createElement("div");
+        priorityWrapper.classList.add("editable");
+        const priorityText = document.createElement("p");
+        priorityText.textContent = task.priority
+            ? task.priority[0].toUpperCase() +
+              task.priority.slice(1) +
+              " priority."
+            : "No priority set.";
+        const priorityEdit = document.createElement("a");
+        priorityEdit.textContent = "Edit";
+        priorityEdit.href = "#";
+        priorityWrapper.append(priorityText, priorityEdit);
+        // TODO: Project
+        // Collapse Task
+        const collapse = document.createElement("img");
+        collapse.setAttribute("src", "../img/icons/menu-up.svg");
+        collapse.classList.add("expand-collapse", "collapse-task");
+        // Add to DOM
+        cardBody.append(
+            detailsWrapper,
+            dueDateWrapper,
+            priorityWrapper,
+            collapse
+        );
+        card.append(cardBody);
+    }
+}
 
 function checkForTarget(e) {
-    console.log(e.target);
     if (e.target.classList.contains("delete-btn")) {
-        DOMController.deleteTask(
+        UI.deleteTask(
             parseInt(e.target.parentElement.parentElement.dataset.toDoIndex),
             10
         );
     } else if (e.target.classList.contains("complete-btn")) {
-        DOMController.completeTask(e);
+        UI.completeTask(e);
+    } else if (e.target.classList.contains("expand-task")) {
+        UI.expandTask(e);
+    } else if (e.target.classList.contains("collapse-task")) {
+        UI.collapseTask(e);
     }
 }
 
@@ -172,10 +259,6 @@ function assignToDoIndex() {
     );
 }
 
-document
-    .querySelector("#addbtn")
-    .addEventListener("click", DOMController.addTask);
+document.querySelector("#addbtn").addEventListener("click", UI.addTask);
 document.querySelector("#tasklist").addEventListener("click", checkForTarget);
-document
-    .querySelector("#expand-form")
-    .addEventListener("click", DOMController.expandForm);
+document.querySelector("#expand-form").addEventListener("click", UI.expandForm);

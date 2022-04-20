@@ -1,1 +1,1 @@
-import { DOMController } from "./dom.js";
+import { UI } from "./dom.js";

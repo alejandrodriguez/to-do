@@ -1,5 +1,5 @@
 body {
-    background-image: linear-gradient(to left, black, rgb(55, 55, 55));
+    background-color: rgba(174, 174, 174, 0.553);
 }
 
 form {
@@ -29,7 +29,7 @@ form {
     opacity: 0.5;
 }
 
-.card-body {
+.card-body-flex {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -49,7 +49,7 @@ form {
 }
 
 .expand-collapse {
-    margin-left: 95%;
+    margin-left: 90%;
     cursor: pointer;
     width: 30px;
 }
@@ -60,4 +60,17 @@ form {
 
 label {
     margin-right: 10px;
+}
+
+a {
+    text-decoration: none;
+}
+
+.editable {
+    display: flex;
+    width: 100%;
+}
+
+.editable p {
+    flex: 1;
 }

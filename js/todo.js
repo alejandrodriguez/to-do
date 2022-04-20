@@ -10,11 +10,11 @@ export class toDoItem {
         this.details = details;
         this.dueDate = dueDate;
         this.priority = priority;
-        this._isCompleted = false;
+        this.isCompleted = false;
         this.project = project;
     }
     complete() {
-        this._isCompleted = !this._isCompleted;
+        this.isCompleted = !this.isCompleted;
     }
 }
 
