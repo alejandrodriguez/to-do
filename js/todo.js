@@ -1,4 +1,4 @@
-export class toDoItem {
+export class Task {
     constructor(
         title,
         details = null,
@@ -18,4 +18,4 @@ export class toDoItem {
     }
 }
 
-export let toDoItems = []; // this will become localStorage
+export let tasks = []; // this will become localStorage

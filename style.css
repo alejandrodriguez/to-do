@@ -1,28 +1,13 @@
 body {
-    background-color: rgba(174, 174, 174, 0.553);
+    background-color: #ccc;
 }
 
 form {
-    background-color: rgba(141, 141, 141, 0.598);
+    background-color: #f4f4f4;
     width: min(30vw, 300px);
     padding: 20px;
     margin: auto;
 }
-
-/* .complete-btn,
-.delete-btn {
-    border: none;
-    height: 30px;
-    width: 30px;
-}
-
-.complete-btn {
-    background-color: rgb(58, 255, 58);
-}
-
-.delete-btn {
-    background-color: orange;
-} */
 
 .completed {
     text-decoration: line-through;
