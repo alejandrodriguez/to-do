@@ -1,4 +1,4 @@
-import { Task } from "./todo.js";
+import { Task } from "./task.js";
 
 export class Storage {
     static getTasks() {
@@ -26,7 +26,6 @@ export class Storage {
         return projects;
     }
     static addProject(project) {
-        project = project.toLowerCase();
         let projects = Storage.getProjects();
         if (!projects.includes(project)) {
             projects.push(project);

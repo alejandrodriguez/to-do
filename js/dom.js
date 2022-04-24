@@ -1,4 +1,4 @@
-import { Task, tasks } from "./todo.js";
+import { Task, tasks } from "./task.js";
 import { Storage } from "./storage.js";
 
 export class UI {
@@ -25,7 +25,13 @@ export class UI {
         }
         Storage.addTask(new Task(title, details, dueDate, priority, project));
         UI.displayTasks();
-        assignToDoIndex();
+        UI.assignTaskIndex();
+    }
+    static assignTaskIndex() {
+        const taskDivs = document.querySelectorAll(".task");
+        taskDivs.forEach((task, index) =>
+            task.setAttribute("data-task-index", index)
+        );
     }
     static collapseForm() {
         const form = document.querySelector("form");
@@ -54,7 +60,7 @@ export class UI {
         e.target.parentElement.parentElement.classList.toggle("completed");
         let tasks = Storage.getTasks();
         tasks[
-            parseInt(e.target.parentElement.parentElement.dataset.toDoIndex, 10)
+            parseInt(e.target.parentElement.parentElement.dataset.taskIndex, 10)
         ].complete();
     }
     static changeTitle() {
@@ -72,15 +78,31 @@ export class UI {
     static changeProject() {
         // TODO
     }
+    static checkForTarget(e) {
+        if (e.target.classList.contains("delete-btn")) {
+            UI.removeTask(
+                parseInt(
+                    e.target.parentElement.parentElement.dataset.taskIndex
+                ),
+                10
+            );
+        } else if (e.target.classList.contains("complete-btn")) {
+            UI.completeTask(e);
+        } else if (e.target.classList.contains("expand-task")) {
+            UI.expandTask(e);
+        } else if (e.target.classList.contains("collapse-task")) {
+            UI.collapseTask(e);
+        }
+    }
     static removeTask(index) {
         Storage.removeTask(index);
         const taskDivs = document.querySelectorAll(".task");
         for (let task of taskDivs) {
-            if (parseInt(task.dataset.toDoIndex, 10) === index) {
+            if (parseInt(task.dataset.taskIndex, 10) === index) {
                 task.remove();
             }
         }
-        assignToDoIndex();
+        UI.assignTaskIndex();
     }
     static displayTasks() {
         const taskList = document.querySelector("#tasklist");
@@ -216,14 +238,14 @@ export class UI {
         // TODO: All edit buttons
         let tasks = Storage.getTasks();
         let task =
-            tasks[parseInt(e.target.parentElement.dataset.toDoIndex, 10)];
+            tasks[parseInt(e.target.parentElement.dataset.taskIndex, 10)];
         const card = e.target.parentElement;
         const cardBody = document.createElement("div");
         cardBody.classList.add("card-body");
         e.target.remove();
         // Details
         const detailsWrapper = document.createElement("div");
-        detailsWrapper.classList.add("editable"); // TODO: Make Class
+        detailsWrapper.classList.add("editable");
         const detailsText = document.createElement("p");
         detailsText.classList.add("card-text");
         detailsText.textContent = task.details
@@ -274,28 +296,10 @@ export class UI {
     }
 }
 
-function checkForTarget(e) {
-    if (e.target.classList.contains("delete-btn")) {
-        UI.removeTask(
-            parseInt(e.target.parentElement.parentElement.dataset.toDoIndex),
-            10
-        );
-    } else if (e.target.classList.contains("complete-btn")) {
-        UI.completeTask(e);
-    } else if (e.target.classList.contains("expand-task")) {
-        UI.expandTask(e);
-    } else if (e.target.classList.contains("collapse-task")) {
-        UI.collapseTask(e);
-    }
-}
-
-function assignToDoIndex() {
-    const taskDivs = document.querySelectorAll(".task");
-    taskDivs.forEach((task, index) =>
-        task.setAttribute("data-to-do-index", index)
-    );
-}
 document.addEventListener("DOMContentLoaded", UI.displayTasks);
+document.addEventListener("DOMContentLoaded", UI.assignTaskIndex);
 document.querySelector("#addbtn").addEventListener("click", UI.addTask);
-document.querySelector("#tasklist").addEventListener("click", checkForTarget);
+document
+    .querySelector("#tasklist")
+    .addEventListener("click", UI.checkForTarget);
 document.querySelector("#expand-form").addEventListener("click", UI.expandForm);
