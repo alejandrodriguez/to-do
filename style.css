@@ -1,5 +1,12 @@
 body {
-    background-color: #ccc;
+    min-height: 100vh;
+    min-width: 100vw;
+    background: linear-gradient(to top, black, rgb(31, 31, 31)) no-repeat;
+    padding: 10px;
+}
+
+h1 {
+    color: white;
 }
 
 form {
@@ -7,6 +14,11 @@ form {
     width: min(30vw, 300px);
     padding: 20px;
     margin: auto;
+}
+
+#select-project {
+    padding: 5px 20px;
+    border-radius: 5px;
 }
 
 .completed {
@@ -58,4 +70,11 @@ a {
 
 .editable p {
     flex: 1;
+}
+
+label[for="select-project"] {
+    display: block;
+    font-size: 1.1rem;
+    color: white;
+    margin-bottom: 1px;
 }

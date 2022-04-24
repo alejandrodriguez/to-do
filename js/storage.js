@@ -10,12 +10,14 @@ export class Storage {
     }
     static addTask(task) {
         let tasks = Storage.getTasks();
+        task.index = tasks.length;
         tasks.push(task);
         localStorage.setItem("tasks", JSON.stringify(tasks));
     }
     static removeTask(index) {
         let tasks = Storage.getTasks();
         tasks.splice(index, 1);
+        tasks.forEach((task, index) => (task.index = index));
         localStorage.setItem("tasks", JSON.stringify(tasks));
     }
     static getProjects() {

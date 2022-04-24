@@ -12,6 +12,7 @@ export class Task {
         this.priority = priority;
         this.isCompleted = false;
         this.project = project;
+        this.index = null;
     }
     complete() {
         this.isCompleted = !this.isCompleted;

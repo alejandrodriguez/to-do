@@ -25,13 +25,7 @@ export class UI {
         }
         Storage.addTask(new Task(title, details, dueDate, priority, project));
         UI.displayTasks();
-        UI.assignTaskIndex();
-    }
-    static assignTaskIndex() {
-        const taskDivs = document.querySelectorAll(".task");
-        taskDivs.forEach((task, index) =>
-            task.setAttribute("data-task-index", index)
-        );
+        UI.displayProjectOptions();
     }
     static collapseForm() {
         const form = document.querySelector("form");
@@ -63,19 +57,20 @@ export class UI {
             parseInt(e.target.parentElement.parentElement.dataset.taskIndex, 10)
         ].complete();
     }
-    static changeTitle() {
-        // TODO
-    }
     static changeDescription() {
         // TODO
     }
     static changeDueDate() {
         // TODO
     }
+
     static changePriority() {
         // TODO
     }
     static changeProject() {
+        // TODO
+    }
+    static changeTitle() {
         // TODO
     }
     static checkForTarget(e) {
@@ -94,22 +89,35 @@ export class UI {
             UI.collapseTask(e);
         }
     }
-    static removeTask(index) {
-        Storage.removeTask(index);
-        const taskDivs = document.querySelectorAll(".task");
-        for (let task of taskDivs) {
-            if (parseInt(task.dataset.taskIndex, 10) === index) {
-                task.remove();
-            }
+    static displayProjectOptions() {
+        const projectList = document.querySelector("#select-project");
+        while (projectList.childElementCount > 1) {
+            projectList.removeChild(projectList.lastChild);
         }
-        UI.assignTaskIndex();
+        const projects = Storage.getProjects();
+        for (let project of projects) {
+            const option = document.createElement("option");
+            option.textContent = project;
+            option.value = project;
+            projectList.append(option);
+        }
     }
-    static displayTasks() {
+    static displayTasks(project = "") {
+        if (typeof project === "object") {
+            project = "";
+        }
         const taskList = document.querySelector("#tasklist");
         while (taskList.lastChild) {
             taskList.removeChild(taskList.lastChild);
         }
-        let tasks = Storage.getTasks();
+        const tasks = Storage.getTasks();
+        if (project !== "") {
+            for (let i = tasks.length - 1; i >= 0; i--) {
+                if (tasks[i].project !== project) {
+                    tasks.splice(i, 1);
+                }
+            }
+        }
         for (let task of tasks) {
             const taskDiv = document.createElement("div");
             taskDiv.classList.add("task", "card", "container", "mb-3");
@@ -148,6 +156,8 @@ export class UI {
             const expand = document.createElement("img");
             expand.setAttribute("src", "../img/icons/menu-down.svg");
             expand.classList.add("expand-collapse", "expand-task");
+            // Link DOM Element with Task in Storage
+            taskDiv.dataset.taskIndex = task.index;
             // Add elements to page
             taskBody.append(taskText, completeBtn, deleteBtn);
             taskDiv.append(taskBody);
@@ -208,6 +218,7 @@ export class UI {
         newProject.name = "new-project";
         newProject.id = "new-project";
         newProject.placeholder = "Project Name";
+        newProject.maxLength = "30";
         newProject.classList.add("form-control", "mb-3");
         projects.addEventListener("change", () => {
             if (projects.value) {
@@ -294,12 +305,25 @@ export class UI {
         );
         card.append(cardBody);
     }
+    static removeTask(index) {
+        const taskDivs = document.querySelectorAll(".task");
+        for (let task of taskDivs) {
+            if (parseInt(task.dataset.taskIndex, 10) === index) {
+                task.remove();
+            }
+        }
+        Storage.removeTask(index);
+        UI.displayTasks(document.querySelector("#select-project").value);
+    }
 }
 
 document.addEventListener("DOMContentLoaded", UI.displayTasks);
-document.addEventListener("DOMContentLoaded", UI.assignTaskIndex);
+document.addEventListener("DOMContentLoaded", UI.displayProjectOptions);
 document.querySelector("#addbtn").addEventListener("click", UI.addTask);
 document
     .querySelector("#tasklist")
     .addEventListener("click", UI.checkForTarget);
 document.querySelector("#expand-form").addEventListener("click", UI.expandForm);
+document
+    .querySelector("#select-project")
+    .addEventListener("change", e => UI.displayTasks(e.target.value));
