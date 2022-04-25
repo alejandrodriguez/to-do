@@ -14,9 +14,6 @@ export class Task {
         this.project = project;
         this.index = null;
     }
-    complete() {
-        this.isCompleted = !this.isCompleted;
-    }
 }
 
 export let tasks = []; // this will become localStorage

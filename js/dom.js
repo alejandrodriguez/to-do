@@ -51,11 +51,12 @@ export class UI {
         grandparent.append(expand);
     }
     static completeTask(e) {
-        e.target.parentElement.parentElement.classList.toggle("completed");
-        let tasks = Storage.getTasks();
-        tasks[
-            parseInt(e.target.parentElement.parentElement.dataset.taskIndex, 10)
-        ].complete();
+        let index = parseInt(
+            e.target.parentElement.parentElement.dataset.taskIndex,
+            10
+        );
+        Storage.completeTask(index);
+        UI.displayTasks();
     }
     static changeDescription() {
         // TODO
@@ -89,6 +90,41 @@ export class UI {
             UI.collapseTask(e);
         }
     }
+    static deleteProject() {
+        const project = document.querySelector("#select-project").value;
+        if (!project) {
+            return;
+        }
+        // Delete project from projects in storage
+        const projects = Storage.getProjects();
+        for (let i = 0; i < projects.length; i++) {
+            if (projects[i] === project) {
+                Storage.removeProject(i);
+            }
+        }
+        // Update DOM
+        UI.displayProjectOptions();
+        UI.displayTasks();
+        // Alert the user of the deletion
+        const alert = document.createElement("div");
+        alert.classList.add("alert", "alert-success", "text-center");
+        alert.textContent = `Your project "${project}" has been successfully deleted.`;
+        document.body.insertBefore(
+            alert,
+            document.querySelector(".project-div")
+        );
+        setTimeout(() => alert.remove(), 3000);
+    }
+    static deleteProjectBtnControl() {
+        const deleteBtn = document.querySelector("#delete-project");
+        if (deleteBtn.previousElementSibling.value === "") {
+            deleteBtn.setAttribute("disabled", true);
+            deleteBtn.style.display = "none";
+        } else {
+            deleteBtn.removeAttribute("disabled");
+            deleteBtn.style.display = "";
+        }
+    }
     static displayProjectOptions() {
         const projectList = document.querySelector("#select-project");
         while (projectList.childElementCount > 1) {
@@ -101,21 +137,29 @@ export class UI {
             option.value = project;
             projectList.append(option);
         }
+        UI.deleteProjectBtnControl();
     }
-    static displayTasks(project = "") {
-        if (typeof project === "object") {
-            project = "";
-        }
+    static displayTasks() {
+        const project = document.querySelector("#select-project").value;
         const taskList = document.querySelector("#tasklist");
         while (taskList.lastChild) {
             taskList.removeChild(taskList.lastChild);
         }
         const tasks = Storage.getTasks();
+        // Remove Tasks not part of project to be displayed
         if (project !== "") {
             for (let i = tasks.length - 1; i >= 0; i--) {
+                console.log(tasks.isCompleted);
                 if (tasks[i].project !== project) {
                     tasks.splice(i, 1);
                 }
+            }
+        }
+        // Display completed tasks at bottom of list
+        for (let i = tasks.length - 1; i >= 0; i--) {
+            if (tasks[i].isCompleted) {
+                tasks.push(tasks[i]);
+                tasks.splice(i, 1);
             }
         }
         for (let task of tasks) {
@@ -139,7 +183,6 @@ export class UI {
             if (task.isCompleted) {
                 taskDiv.classList.add("completed");
             }
-            taskDiv.style.width = "33vw";
             const taskBody = document.createElement("div");
             taskBody.classList.add("card-body", "card-body-flex");
             const taskText = document.createElement("h5");
@@ -193,7 +236,7 @@ export class UI {
         priority.name = "priority";
         priority.id = "priority";
         priority.classList.add("form-select", "mb-3");
-        priority.innerHTML = `<option value="none" selected>Priority</option>
+        priority.innerHTML = `<option value="" selected>Priority</option>
         <option value="low">Low</option>
         <option value="medium">Medium</option>
         <option value="high">High</option>`;
@@ -291,7 +334,17 @@ export class UI {
         priorityEdit.textContent = "Edit";
         priorityEdit.href = "#";
         priorityWrapper.append(priorityText, priorityEdit);
-        // TODO: Project
+        // Project
+        const projectWrapper = document.createElement("div");
+        projectWrapper.classList.add("editable");
+        const projectText = document.createElement("p");
+        projectText.textContent = task.project
+            ? "Project: " + task.project
+            : "Not part of a project.";
+        const projectEdit = document.createElement("a");
+        projectEdit.textContent = "Edit";
+        projectEdit.href = "#";
+        projectWrapper.append(projectText, projectEdit);
         // Collapse Task
         const collapse = document.createElement("img");
         collapse.setAttribute("src", "../img/icons/menu-up.svg");
@@ -301,24 +354,35 @@ export class UI {
             detailsWrapper,
             dueDateWrapper,
             priorityWrapper,
+            projectWrapper,
             collapse
         );
         card.append(cardBody);
     }
     static removeTask(index) {
         const taskDivs = document.querySelectorAll(".task");
+        const title = Storage.getTasks()[index].title;
         for (let task of taskDivs) {
             if (parseInt(task.dataset.taskIndex, 10) === index) {
                 task.remove();
             }
         }
         Storage.removeTask(index);
-        UI.displayTasks(document.querySelector("#select-project").value);
+        const alert = document.createElement("div");
+        alert.classList.add("alert", "alert-success", "text-center");
+        alert.textContent = `Your task "${title}" has been successfully deleted.`;
+        UI.displayTasks();
+        document.body.insertBefore(
+            alert,
+            document.querySelector(".project-div")
+        );
+        setTimeout(() => alert.remove(), 3000);
     }
 }
 
 document.addEventListener("DOMContentLoaded", UI.displayTasks);
 document.addEventListener("DOMContentLoaded", UI.displayProjectOptions);
+document.addEventListener("DOMContentLoaded", UI.deleteProjectBtnControl);
 document.querySelector("#addbtn").addEventListener("click", UI.addTask);
 document
     .querySelector("#tasklist")
@@ -327,3 +391,11 @@ document.querySelector("#expand-form").addEventListener("click", UI.expandForm);
 document
     .querySelector("#select-project")
     .addEventListener("change", e => UI.displayTasks(e.target.value));
+document
+    .querySelector("#select-project")
+    .addEventListener("change", UI.deleteProjectBtnControl);
+document
+    .querySelector("#delete-project")
+    .addEventListener("click", UI.deleteProject);
+// TODO: Edits
+// TODO: Alert after deletion of project

@@ -78,3 +78,14 @@ label[for="select-project"] {
     color: white;
     margin-bottom: 1px;
 }
+
+.project-div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 7px;
+}
+
+.task {
+    width: max(800px, 50vw);
+}

@@ -20,6 +20,16 @@ export class Storage {
         tasks.forEach((task, index) => (task.index = index));
         localStorage.setItem("tasks", JSON.stringify(tasks));
     }
+    static editTask(index, property, newValue) {
+        let tasks = Storage.getTasks();
+        tasks[index][property] = newValue;
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+    }
+    static completeTask(index) {
+        let tasks = Storage.getTasks();
+        tasks[index].isCompleted = !tasks[index].isCompleted;
+        localStorage.setItem("tasks", JSON.stringify(tasks));
+    }
     static getProjects() {
         let projects = [];
         if (localStorage.getItem("projects")) {
@@ -33,11 +43,18 @@ export class Storage {
             projects.push(project);
             localStorage.setItem("projects", JSON.stringify(projects));
         }
-        // TODO: Reload Project Navbar
     }
     static removeProject(index) {
         let projects = Storage.getProjects();
+        const projectName = projects[index];
         projects.splice(index, 1);
         localStorage.setItem("projects", JSON.stringify(projects));
+        let tasks = Storage.getTasks();
+        for (let task of tasks) {
+            if (task.project === projectName) {
+                task.project = null;
+            }
+        }
+        localStorage.setItem("tasks", JSON.stringify(tasks));
     }
 }
