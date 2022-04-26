@@ -35,20 +35,37 @@ export class UI {
                 item.remove();
             }
         });
-        const expand = document.createElement("img");
-        expand.setAttribute("src", "../img/icons/menu-down.svg");
-        expand.id = "expand-form";
-        expand.className = "expand-collapse";
-        expand.addEventListener("click", UI.expandForm);
-        form.append(expand);
+        const menuDiv = document.createElement("div");
+        menuDiv.classList.add("menu");
+        const expandImg = document.createElement("img");
+        expandImg.src = "../img/menu-down.svg";
+        const expandBtn = document.createElement("button");
+        expandBtn.id = "expand-form";
+        expandBtn.classList.add("icon", "btn");
+        expandBtn.addEventListener("click", UI.expandForm);
+        expandBtn.append(expandImg);
+        menuDiv.append(document.createElement("div"), expandBtn);
+        form.append(menuDiv);
     }
     static collapseTask(e) {
-        const grandparent = e.target.parentElement.parentElement;
-        e.target.parentElement.remove();
-        const expand = document.createElement("img");
-        expand.setAttribute("src", "../img/icons/menu-down.svg");
-        expand.classList.add("expand-collapse", "expand-task");
-        grandparent.append(expand);
+        e.target.parentElement.parentElement.remove();
+        const menuDiv = document.createElement("div");
+        menuDiv.classList.add("menu");
+        menuDiv.append(document.createElement("div"));
+        const expandImg = document.createElement("img");
+        expandImg.src = "../img/menu-down.svg";
+        const expandBtn = document.createElement("button");
+        expandBtn.classList.add("icon", "expand-task", "btn");
+        expandBtn.append(expandImg);
+        menuDiv.append(expandBtn);
+        const taskIndex = parseInt(
+            e.target.parentElement.dataset.taskIndex,
+            10
+        );
+        menuDiv.dataset.taskIndex = taskIndex;
+        document
+            .querySelector(`div[data-task-index="${taskIndex}"]`)
+            .append(menuDiv);
     }
     static completeTask(e) {
         let index = parseInt(
@@ -57,22 +74,6 @@ export class UI {
         );
         Storage.completeTask(index);
         UI.displayTasks();
-    }
-    static changeDescription() {
-        // TODO
-    }
-    static changeDueDate() {
-        // TODO
-    }
-
-    static changePriority() {
-        // TODO
-    }
-    static changeProject() {
-        // TODO
-    }
-    static changeTitle() {
-        // TODO
     }
     static checkForTarget(e) {
         if (e.target.classList.contains("delete-btn")) {
@@ -88,6 +89,8 @@ export class UI {
             UI.expandTask(e);
         } else if (e.target.classList.contains("collapse-task")) {
             UI.collapseTask(e);
+        } else if (e.target.classList.contains("edit-btn")) {
+            UI.openEditForm(e);
         }
     }
     static deleteProject() {
@@ -130,12 +133,24 @@ export class UI {
         while (projectList.childElementCount > 1) {
             projectList.removeChild(projectList.lastChild);
         }
+        // If add task form is expanded
+        let projectForm = null;
+        if (document.querySelector("#project-drop-down")) {
+            projectForm = document.querySelector("#project-drop-down");
+            while (projectForm.childElementCount > 1) {
+                projectForm.removeChild(projectForm.lastChild);
+            }
+        }
         const projects = Storage.getProjects();
         for (let project of projects) {
             const option = document.createElement("option");
             option.textContent = project;
             option.value = project;
             projectList.append(option);
+            if (projectForm) {
+                const formOption = option.cloneNode(true);
+                projectForm.append(formOption);
+            }
         }
         UI.deleteProjectBtnControl();
     }
@@ -149,7 +164,6 @@ export class UI {
         // Remove Tasks not part of project to be displayed
         if (project !== "") {
             for (let i = tasks.length - 1; i >= 0; i--) {
-                console.log(tasks.isCompleted);
                 if (tasks[i].project !== project) {
                     tasks.splice(i, 1);
                 }
@@ -195,27 +209,108 @@ export class UI {
             const deleteBtn = document.createElement("button");
             deleteBtn.innerHTML = "&#120;";
             deleteBtn.classList.add("delete-btn", "btn", "btn-danger");
+            // Menu Div
+            const menuDiv = document.createElement("div");
+            menuDiv.classList.add("menu", "btn");
+            menuDiv.append(document.createElement("div"));
             // Expand Button
             const expand = document.createElement("img");
-            expand.setAttribute("src", "../img/icons/menu-down.svg");
-            expand.classList.add("expand-collapse", "expand-task");
-            // Link DOM Element with Task in Storage
+            expand.src = "../img/menu-down.svg";
+            expand.classList.add("icon", "expand-task");
+            menuDiv.append(expand);
+            // Link DOM Element and menu with Task in Storage
             taskDiv.dataset.taskIndex = task.index;
+            menuDiv.dataset.taskIndex = task.index;
             // Add elements to page
             taskBody.append(taskText, completeBtn, deleteBtn);
-            taskDiv.append(taskBody);
-            taskDiv.append(expand);
+            taskDiv.append(taskBody, menuDiv);
             taskList.append(taskDiv);
         }
+    }
+    static editTask(e) {
+        e.preventDefault();
+        if (e.target.nodeName === "FORM") {
+            e.target.nextElementSibling.children[1].click();
+            return;
+        }
+        const index = e.target.dataset.taskIndex;
+        const taskForm = e.target.parentElement.previousElementSibling;
+        const details = taskForm.children[0].value
+            ? taskForm.children[0].value
+            : null;
+        console.log(taskForm.children[1].lastChild.value);
+        const dueDate = taskForm.children[1].lastChild.value
+            ? taskForm.children[1].lastChild.value
+            : null;
+        const priority = taskForm.children[2].value
+            ? taskForm.children[2].value
+            : null;
+        const project = taskForm.children[3].value
+            ? taskForm.children[3].value
+            : null;
+        Storage.editTask(index, "details", details);
+        Storage.editTask(index, "dueDate", dueDate);
+        Storage.editTask(index, "priority", priority);
+        Storage.editTask(index, "project", project);
+        if (project) {
+            Storage.addProject(project);
+            UI.displayProjectOptions();
+        }
+        // Get current task info
+        const task = Storage.getTasks()[index];
+        // Details Element
+        const detailsElement = document.createElement("p");
+        detailsElement.classList.add("card-text");
+        detailsElement.textContent = task.details
+            ? task.details
+            : "No extra details.";
+        // Due Date Element
+        const dueDateElement = document.createElement("p");
+        dueDateElement.classList.add("card-text");
+        dueDateElement.textContent = task.dueDate
+            ? `Due: ${task.dueDate}`
+            : "No due date.";
+        // Priority Element
+        const priorityElement = document.createElement("p");
+        priorityElement.textContent = task.priority
+            ? task.priority[0].toUpperCase() +
+              task.priority.slice(1) +
+              " priority."
+            : "No priority set.";
+        // Project Element
+        const projectElement = document.createElement("p");
+        projectElement.textContent = task.project
+            ? "Project: " + task.project
+            : "Not part of a project.";
+        // Replace form with new data
+        const grandparent = e.target.parentElement.parentElement;
+        taskForm.remove();
+        grandparent.append(
+            detailsElement,
+            dueDateElement,
+            priorityElement,
+            projectElement,
+            e.target.parentElement
+        );
+        // Replace submit button with edit button
+        const editBtn = document.createElement("button");
+        editBtn.classList.add("btn", "icon", "edit-btn");
+        const pencil = document.createElement("img");
+        pencil.src = "../img/pencil.svg";
+        editBtn.dataset.taskIndex = index;
+        editBtn.append(pencil);
+        e.target.parentElement.insertBefore(editBtn, e.target);
+        e.target.remove();
     }
     static expandForm() {
         // Delete Expand Button
         document.querySelector("#expand-form").remove();
         // Details Input
-        const details = document.createElement("input");
+        const details = document.createElement("textarea");
         details.name = "details";
         details.id = "details";
         details.placeholder = "Details";
+        details.maxLength = "280";
         details.classList.add("form-control", "mb-3");
         // Due Date Wrapper
         const dueDateWrapper = document.createElement("div");
@@ -272,92 +367,137 @@ export class UI {
             }
         });
         projectWrapper.append(projects, newProject);
+        // Menu Div
+        const menuDiv = document.createElement("div");
+        menuDiv.classList.add("menu");
+        menuDiv.append(document.createElement("div"));
         // Collapse Button
         const collapse = document.createElement("img");
-        collapse.setAttribute("src", "../img/icons/menu-up.svg");
+        collapse.src = "../img/menu-up.svg";
         collapse.id = "collapse-form";
-        collapse.className = "expand-collapse";
+        collapse.classList.add("icon", "btn");
         collapse.addEventListener("click", UI.collapseForm);
+        menuDiv.append(collapse);
         // Add to Form
         const form = document.querySelector("form");
-        form.append(
-            details,
-            dueDateWrapper,
-            priority,
-            projectWrapper,
-            collapse
-        );
+        form.append(details, dueDateWrapper, priority, projectWrapper, menuDiv);
     }
     static expandTask(e) {
-        // TODO: All edit buttons
         let tasks = Storage.getTasks();
         let task =
             tasks[parseInt(e.target.parentElement.dataset.taskIndex, 10)];
-        const card = e.target.parentElement;
+        const card = e.target.parentElement.parentElement;
         const cardBody = document.createElement("div");
         cardBody.classList.add("card-body");
-        e.target.remove();
+        e.target.parentElement.remove();
         // Details
-        const detailsWrapper = document.createElement("div");
-        detailsWrapper.classList.add("editable");
-        const detailsText = document.createElement("p");
-        detailsText.classList.add("card-text");
-        detailsText.textContent = task.details
-            ? task.details
-            : "No extra details.";
-        const detailsEdit = document.createElement("a");
-        detailsEdit.textContent = "Edit";
-        detailsEdit.href = "#";
-        detailsWrapper.append(detailsText, detailsEdit);
+        const details = document.createElement("p");
+        details.classList.add("card-text");
+        details.textContent = task.details ? task.details : "No extra details.";
         // Due Date
-        const dueDateWrapper = document.createElement("div");
-        dueDateWrapper.classList.add("editable");
-        const dueDateText = document.createElement("p");
-        dueDateText.classList.add("card-text");
-        dueDateText.textContent = task.dueDate
+        const dueDate = document.createElement("p");
+        dueDate.classList.add("card-text");
+        dueDate.textContent = task.dueDate
             ? `Due: ${task.dueDate}`
             : "No due date.";
-        const dueDateEdit = document.createElement("a");
-        dueDateEdit.textContent = "Edit";
-        dueDateEdit.href = "#";
-        dueDateWrapper.append(dueDateText, dueDateEdit);
         // Priority
-        const priorityWrapper = document.createElement("div");
-        priorityWrapper.classList.add("editable");
-        const priorityText = document.createElement("p");
-        priorityText.textContent = task.priority
+        const priority = document.createElement("p");
+        priority.textContent = task.priority
             ? task.priority[0].toUpperCase() +
               task.priority.slice(1) +
               " priority."
             : "No priority set.";
-        const priorityEdit = document.createElement("a");
-        priorityEdit.textContent = "Edit";
-        priorityEdit.href = "#";
-        priorityWrapper.append(priorityText, priorityEdit);
         // Project
-        const projectWrapper = document.createElement("div");
-        projectWrapper.classList.add("editable");
-        const projectText = document.createElement("p");
-        projectText.textContent = task.project
+        const project = document.createElement("p");
+        project.textContent = task.project
             ? "Project: " + task.project
             : "Not part of a project.";
-        const projectEdit = document.createElement("a");
-        projectEdit.textContent = "Edit";
-        projectEdit.href = "#";
-        projectWrapper.append(projectText, projectEdit);
+        // Menu Div
+        const menuDiv = document.createElement("div");
+        menuDiv.classList.add("menu");
+        menuDiv.append(document.createElement("div"));
+        menuDiv.dataset.taskIndex = e.target.parentElement.dataset.taskIndex;
+        // Edit Button
+        const editBtn = document.createElement("button");
+        editBtn.classList.add("btn", "icon", "edit-btn");
+        const pencil = document.createElement("img");
+        pencil.src = "../img/pencil.svg";
+        editBtn.dataset.taskIndex = e.target.parentElement.dataset.taskIndex;
+        editBtn.append(pencil);
         // Collapse Task
         const collapse = document.createElement("img");
-        collapse.setAttribute("src", "../img/icons/menu-up.svg");
-        collapse.classList.add("expand-collapse", "collapse-task");
+        collapse.src = "../img/menu-up.svg";
+        collapse.classList.add("icon", "collapse-task", "btn");
         // Add to DOM
-        cardBody.append(
-            detailsWrapper,
-            dueDateWrapper,
-            priorityWrapper,
-            projectWrapper,
-            collapse
-        );
+        menuDiv.append(editBtn, collapse);
+        cardBody.append(details, dueDate, priority, project, menuDiv);
         card.append(cardBody);
+    }
+    static openEditForm(e) {
+        const cardBody = e.target.parentElement.parentElement;
+        const menu = e.target.parentElement;
+        while (cardBody.childElementCount > 1) {
+            cardBody.removeChild(cardBody.firstChild);
+        }
+        const task = Storage.getTasks()[e.target.dataset.taskIndex];
+        // Details Input
+        const details = document.createElement("textarea");
+        details.name = "details";
+        details.placeholder = "Details";
+        details.value = task.details ? task.details : "";
+        details.maxLength = "280";
+        details.classList.add("form-control", "mb-3");
+        // Due Date Wrapper
+        const dueDateWrapper = document.createElement("div");
+        dueDateWrapper.classList.add("mb-3");
+        // Due Date Label
+        const dueDateLabel = document.createElement("label");
+        dueDateLabel.textContent = "Due Date:";
+        dueDateWrapper.append(dueDateLabel);
+        // Due Date Input
+        const dueDate = document.createElement("input");
+        dueDate.name = "dueDate";
+        dueDate.type = "date";
+        dueDate.value = task.dueDate ? task.dueDate : "";
+        dueDateWrapper.append(dueDate);
+        //Priority
+        const priority = document.createElement("select");
+        priority.name = "priority";
+        priority.classList.add("form-select", "mb-3");
+        priority.innerHTML = `<option value="" selected>Priority</option>
+        <option value="low">Low</option>
+        <option value="medium">Medium</option>
+        <option value="high">High</option>`;
+        switch (task.priority) {
+            case "low":
+                priority.children[1].setAttribute("selected", true);
+                break;
+            case "medium":
+                priority.children[2].setAttribute("selected", true);
+                break;
+            case "high":
+                priority.children[3].setAttribute("selected", true);
+                break;
+        }
+        // Project Input
+        const project = document.createElement("input");
+        project.name = "project";
+        project.classList.add("form-control", "mb-3");
+        project.value = task.project ? task.project : "";
+        project.placeholder = "Project Name";
+        // Change edit button to submit button
+        const confirmBtn = document.createElement("button");
+        confirmBtn.classList.add("btn", "btn-primary");
+        confirmBtn.innerHTML = "&#10003;";
+        confirmBtn.dataset.taskIndex = e.target.dataset.taskIndex;
+        confirmBtn.addEventListener("click", e => UI.editTask(e));
+        // Add to DOM
+        const form = document.createElement("form");
+        form.addEventListener("submit", e => UI.editTask(e));
+        form.append(details, dueDateWrapper, priority, project);
+        cardBody.insertBefore(form, menu);
+        menu.insertBefore(confirmBtn, e.target);
+        e.target.remove();
     }
     static removeTask(index) {
         const taskDivs = document.querySelectorAll(".task");
@@ -397,5 +537,3 @@ document
 document
     .querySelector("#delete-project")
     .addEventListener("click", UI.deleteProject);
-// TODO: Edits
-// TODO: Alert after deletion of project

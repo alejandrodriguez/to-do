@@ -3,7 +3,7 @@ export class Task {
         title,
         details = null,
         dueDate = null,
-        priority,
+        priority = null,
         project = null
     ) {
         this.title = title;

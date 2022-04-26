@@ -9,7 +9,7 @@ h1 {
     color: white;
 }
 
-form {
+.add-task-form {
     background-color: #f4f4f4;
     width: min(30vw, 300px);
     padding: 20px;
@@ -32,8 +32,9 @@ form {
     align-items: center;
 }
 
-.card-body button {
+.card button {
     font-weight: 700;
+    color: white;
 }
 
 .complete-btn {
@@ -45,13 +46,7 @@ form {
     margin: 0;
 }
 
-.expand-collapse {
-    margin-left: 90%;
-    cursor: pointer;
-    width: 30px;
-}
-
-.expand-collapse:hover {
+.icon:hover {
     transform: scale(150%);
 }
 
@@ -88,4 +83,16 @@ label[for="select-project"] {
 
 .task {
     width: max(800px, 50vw);
+}
+
+.menu {
+    display: flex;
+}
+
+.menu > div {
+    flex: 1;
+}
+
+button > img {
+    pointer-events: none;
 }

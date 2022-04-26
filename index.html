@@ -13,7 +13,7 @@
         <script src="js/index.js" type="module"></script>
     </head>
     <body>
-        <div class="container text-center mb-4 page-heading">
+        <div class="container text-center mb-5 page-heading">
             <h1>Get 'Er Done</h1>
         </div>
         <div class="container text-center mb-3 project-div">
@@ -24,7 +24,7 @@
                 &#120;
             </button>
         </div>
-        <form class="mb-3">
+        <form class="mb-3 add-task-form">
             <div class="row mb-3 required">
                 <div class="col-sm-10 required">
                     <input
@@ -43,11 +43,12 @@
                     +
                 </button>
             </div>
-            <img
-                id="expand-form"
-                class="expand-collapse"
-                src="img/icons/menu-down.svg"
-            />
+            <div class="menu">
+                <div></div>
+                <button class="btn icon" type="button" id="expand-form">
+                    <img src="img/menu-down.svg" />
+                </button>
+            </div>
         </form>
         <div id="tasklist"></div>
     </body>
