@@ -38,7 +38,7 @@ export class UI {
         const menuDiv = document.createElement("div");
         menuDiv.classList.add("menu");
         const expandImg = document.createElement("img");
-        expandImg.src = "../img/menu-down.svg";
+        expandImg.src = "img/menu-down.svg";
         const expandBtn = document.createElement("button");
         expandBtn.id = "expand-form";
         expandBtn.classList.add("icon", "btn");
@@ -53,7 +53,7 @@ export class UI {
         menuDiv.classList.add("menu");
         menuDiv.append(document.createElement("div"));
         const expandImg = document.createElement("img");
-        expandImg.src = "../img/menu-down.svg";
+        expandImg.src = "img/menu-down.svg";
         const expandBtn = document.createElement("button");
         expandBtn.classList.add("icon", "expand-task", "btn");
         expandBtn.append(expandImg);
@@ -215,7 +215,7 @@ export class UI {
             menuDiv.append(document.createElement("div"));
             // Expand Button
             const expand = document.createElement("img");
-            expand.src = "../img/menu-down.svg";
+            expand.src = "img/menu-down.svg";
             expand.classList.add("icon", "expand-task");
             menuDiv.append(expand);
             // Link DOM Element and menu with Task in Storage
@@ -296,7 +296,7 @@ export class UI {
         const editBtn = document.createElement("button");
         editBtn.classList.add("btn", "icon", "edit-btn");
         const pencil = document.createElement("img");
-        pencil.src = "../img/pencil.svg";
+        pencil.src = "img/pencil.svg";
         editBtn.dataset.taskIndex = index;
         editBtn.append(pencil);
         e.target.parentElement.insertBefore(editBtn, e.target);
@@ -373,7 +373,7 @@ export class UI {
         menuDiv.append(document.createElement("div"));
         // Collapse Button
         const collapse = document.createElement("img");
-        collapse.src = "../img/menu-up.svg";
+        collapse.src = "img/menu-up.svg";
         collapse.id = "collapse-form";
         collapse.classList.add("icon", "btn");
         collapse.addEventListener("click", UI.collapseForm);
@@ -421,12 +421,12 @@ export class UI {
         const editBtn = document.createElement("button");
         editBtn.classList.add("btn", "icon", "edit-btn");
         const pencil = document.createElement("img");
-        pencil.src = "../img/pencil.svg";
+        pencil.src = "img/pencil.svg";
         editBtn.dataset.taskIndex = e.target.parentElement.dataset.taskIndex;
         editBtn.append(pencil);
         // Collapse Task
         const collapse = document.createElement("img");
-        collapse.src = "../img/menu-up.svg";
+        collapse.src = "img/menu-up.svg";
         collapse.classList.add("icon", "collapse-task", "btn");
         // Add to DOM
         menuDiv.append(editBtn, collapse);
